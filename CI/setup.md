@@ -82,7 +82,32 @@ Spotifire CI administration
 
 Spotifire CI backup
 ===================
+## Set up backup script
+* Put the following in a script ~/backup.sh
+`
+#!/bin/bash
+
+datetag=$(date +%y-%m-%d)
+
+docker_backup() {
+	docker run --rm \
+		--volumes-from=$1:ro \
+		-v ~/backups/$datetag:/backups \
+		ubuntu:16.04 \
+		tar zcvf /backups/$2.tar.gz $3
+}
+
+   docker_backup mariadb-spotifire mariadb /var/lib/mysql \
+&& docker_backup jenkins-spotifire jenkins_home /var/jenkins_home \
+&& docker_backup youtrack-spotifire youtrack_data /opt/youtrack/data \
+&& docker_backup youtrack-spotifire youtrack_conf /opt/youtrack/conf \
+&& docker_backup youtrack-spotifire youtrack_logs /opt/youtrack/logs \
+&& docker_backup youtrack-spotifire youtrack_backups /opt/youtrack/backups
+`
+Then run
+`chmod +x ~/backup.sh`
+Your backups will end up in `~/backups/` !
 ## Run a backup of everything
-`
+Run `./backup.sh`
+## Schedule a backup of everything every evening and only keep the last 7 backups
 TODO
-`
